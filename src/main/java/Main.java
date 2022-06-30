@@ -3,6 +3,7 @@ import estimators.*;
 import helper.*;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.javatuples.Quartet;
+import org.javatuples.Septet;
 import org.javatuples.Sextet;
 
 import javax.xml.crypto.Data;
@@ -63,7 +64,7 @@ public class Main {
 
             wally_tasks_lower_frequ = readCSVFile("execution_reports/wallyRedCpu/results_" + workflow.toString().toLowerCase() + "/execution_report_" + experiment_number + "_wallyRedCpu.csv");
 
-            c2_tasks = readCSVFile("execution_reports/" + targetMachine.toString().toLowerCase() + "/results_" + workflow.toString().toLowerCase() + "/execution_report_" + experiment_number + "_"+ targetMachine.toString().toLowerCase() +".csv");
+            c2_tasks = readCSVFile("execution_reports/" + targetMachine.toString().toLowerCase() + "/results_" + workflow.toString().toLowerCase() + "/execution_report_" + experiment_number + "_" + targetMachine.toString().toLowerCase() + ".csv");
 
             c2_tasksForTest = readCSVFile("execution_reports/" + targetMachine.toString().toLowerCase() + "/results_" + workflow.toString().toLowerCase() + "/execution_report_" + control_number + "_" + targetMachine.toString().toLowerCase() + ".csv");
         } else {
@@ -100,7 +101,7 @@ public class Main {
         System.out.println("Feature to predict: " + to_predict);
         System.out.println("------------------------------");
 
-        ArrayList<Sextet<String, String, String, double[], double[], double[]>> estimates = new ArrayList<>();
+        ArrayList<Septet<String, String, String, double[], double[], double[], double[]>> estimates = new ArrayList<>();
 
         wally_tasks_grouped.keySet().forEach(key -> {
             var listTasksWally = wally_tasks_grouped.get(key);
@@ -163,7 +164,7 @@ public class Main {
 
             //Lotaru
 
-            DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru")).map(sextet -> sextet.getValue5()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
+            DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
 
             double median_predicted_lotaru = descriptiveStatistics.getPercentile(50);
             System.out.println("Lotaru median deviation: " + median_predicted_lotaru);
@@ -172,7 +173,7 @@ public class Main {
 
             //Online-M
 
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Online-M")).map(sextet -> sextet.getValue5()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
+            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Online-M")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
 
             double median_predicted_online_m = descriptiveStatistics.getPercentile(50);
             System.out.println("Online-M median deviation: " + median_predicted_online_m);
@@ -182,7 +183,7 @@ public class Main {
 
             //Online-P
 
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Online-P")).map(sextet -> sextet.getValue5()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
+            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Online-P")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
 
             double median_predicted_online_p = descriptiveStatistics.getPercentile(50);
             System.out.println("Online-P median deviation: " + median_predicted_online_p);
@@ -192,7 +193,7 @@ public class Main {
 
             //Naive
 
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Naive")).map(sextet -> sextet.getValue5()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
+            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Naive")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
 
             double median_predicted_naive = descriptiveStatistics.getPercentile(50);
             System.out.println("Naive median deviation: " + median_predicted_naive);
@@ -220,7 +221,7 @@ public class Main {
             String[] csv_arr = s.split(",");
             HistoricTask historicTask;
 
-            if(s.contains("-")) {
+            if (s.contains("-")) {
                 System.out.println("---");
             }
 
@@ -341,7 +342,7 @@ public class Main {
             wally_ratio_cpu = wally_score_cpu_sysbench / asok02_score_cpu_sysbench;
             wally_ration_io = wally_score_io / asok02_score_io;
 
-        } else if ( targetMachine == TargetMachine.ASOK01) {
+        } else if (targetMachine == TargetMachine.ASOK01) {
             wally_ratio_cpu = wally_score_cpu_sysbench / asok01_score_cpu_sysbench;
             wally_ration_io = wally_score_io / asok01_score_io;
         }

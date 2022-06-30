@@ -10,6 +10,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
+import org.javatuples.Septet;
 import org.javatuples.Sextet;
 
 import java.util.*;
@@ -26,7 +27,7 @@ public class Online implements Estimator {
     }
 
     @Override
-    public Sextet<String, String, String, double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
         if (factor != 1 || test_x.length != test_x.length) {
             throw new IllegalArgumentException();
@@ -79,7 +80,7 @@ public class Online implements Estimator {
             System.out.println("Actual Time: " + actual);
             System.out.println("Abweichung:  " + Math.abs((predicted[0] - actual) / actual));
 
-            return new Sextet<>(taskname, estimatorName, resourceToPredict, predicted, test_y, predictedError);
+            return new Septet<>(taskname, estimatorName, resourceToPredict, test_x, predicted, test_y, predictedError);
         } else {
 
 
@@ -97,17 +98,17 @@ public class Online implements Estimator {
 
                 double[] toReturnError = new double[test_y.length];
 
-                for(int i=0; i<toReturnError.length; i++) {
+                for (int i = 0; i < toReturnError.length; i++) {
                     toReturnError[i] = Math.abs((median_predicted - test_y[i]) / test_y[i]);
                 }
 
                 double[] median_predicted_arr = new double[test_y.length];
 
-                for(int i=0; i<test_y.length; i++) {
+                for (int i = 0; i < test_y.length; i++) {
                     median_predicted_arr[i] = median_predicted;
                 }
 
-                return new Sextet<>(taskname, estimatorName, resourceToPredict, median_predicted_arr, test_y, toReturnError);
+                return new Septet<>(taskname, estimatorName, resourceToPredict, test_x,median_predicted_arr, test_y, toReturnError);
             }
 
             ArrayList<DoublePoint> clusterPoints = new ArrayList<>();
@@ -147,17 +148,17 @@ public class Online implements Estimator {
 
                 double[] toReturnError = new double[test_y.length];
 
-                for(int i=0; i<toReturnError.length; i++) {
+                for (int i = 0; i < toReturnError.length; i++) {
                     toReturnError[i] = Math.abs((predicted - test_y[i]) / test_y[i]);
                 }
 
                 double[] percentile_predicted_arr = new double[test_y.length];
 
-                for(int i=0; i<test_y.length; i++) {
+                for (int i = 0; i < test_y.length; i++) {
                     percentile_predicted_arr[i] = predicted;
                 }
 
-                return new Sextet<>(taskname, estimatorName, resourceToPredict, percentile_predicted_arr, test_y, toReturnError);
+                return new Septet<>(taskname, estimatorName, resourceToPredict, test_x ,percentile_predicted_arr, test_y, toReturnError);
             }
 
             NormalDistribution normalDistribution = new NormalDistribution(mean, std);
@@ -167,17 +168,15 @@ public class Online implements Estimator {
             double k_s_gamma = kolmogorovSmirnovTest.kolmogorovSmirnovTest(gammaDistribution, train_y);
 
 
-
             double critical_value = ksLookup(train_x.length);
-
 
 
             if (k_s_normal > critical_value) {
                 RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
-                predicted =  randomDataGenerator.nextGaussian(normalDistribution.getMean(), normalDistribution.getStandardDeviation());
+                predicted = randomDataGenerator.nextGaussian(normalDistribution.getMean(), normalDistribution.getStandardDeviation());
             } else if (k_s_gamma > critical_value) {
                 RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
-                predicted =  randomDataGenerator.nextGamma(gammaDistribution.getShape(), gammaDistribution.getNumericalMean());
+                predicted = randomDataGenerator.nextGamma(gammaDistribution.getShape(), gammaDistribution.getNumericalMean());
             } else {
                 predicted = stats.getPercentile(50);
             }
@@ -189,17 +188,17 @@ public class Online implements Estimator {
 
             double[] toReturnError = new double[test_y.length];
 
-            for(int i=0; i<toReturnError.length; i++) {
+            for (int i = 0; i < toReturnError.length; i++) {
                 toReturnError[i] = Math.abs((predicted - test_y[i]) / test_y[i]);
             }
 
             double[] percentile_predicted_arr = new double[test_y.length];
 
-            for(int i=0; i<test_y.length; i++) {
+            for (int i = 0; i < test_y.length; i++) {
                 percentile_predicted_arr[i] = predicted;
             }
 
-            return new Sextet<>(taskname, estimatorName, resourceToPredict, percentile_predicted_arr, test_y, toReturnError);
+            return new Septet<>(taskname, estimatorName, resourceToPredict, test_x ,percentile_predicted_arr, test_y, toReturnError);
         }
 
     }
@@ -241,61 +240,87 @@ public class Online implements Estimator {
         cluster = clusterMap.get(mapWithScore.firstKey());
         return cluster;
     }
+
     // https://web.archive.org/web/20160818104718/http://www.mathematik.uni-kl.de/~schwaar/Exercises/Tabellen/table_kolmogorov.pdf
     private double ksLookup(int n) {
 
         double criticalValue;
 
         switch (n) {
-            case 1:  criticalValue = 0.950;
+            case 1:
+                criticalValue = 0.950;
                 break;
-            case 2:  criticalValue = 0.776;
+            case 2:
+                criticalValue = 0.776;
                 break;
-            case 3:  criticalValue = 0.636;
+            case 3:
+                criticalValue = 0.636;
                 break;
-            case 4:  criticalValue = 0.565;
+            case 4:
+                criticalValue = 0.565;
                 break;
-            case 5:  criticalValue = 0.510;
+            case 5:
+                criticalValue = 0.510;
                 break;
-            case 6:  criticalValue = 0.468;
+            case 6:
+                criticalValue = 0.468;
                 break;
-            case 7:  criticalValue = 0.436;
+            case 7:
+                criticalValue = 0.436;
                 break;
-            case 8:  criticalValue = 0.410;
+            case 8:
+                criticalValue = 0.410;
                 break;
-            case 9:  criticalValue = 0.387;
+            case 9:
+                criticalValue = 0.387;
                 break;
-            case 10: criticalValue = 0.369;
+            case 10:
+                criticalValue = 0.369;
                 break;
-            case 11: criticalValue = 0.352;
+            case 11:
+                criticalValue = 0.352;
                 break;
-            case 12: criticalValue = 0.338;
+            case 12:
+                criticalValue = 0.338;
                 break;
-            case 13:  criticalValue = 0.325;
+            case 13:
+                criticalValue = 0.325;
                 break;
-            case 14:  criticalValue = 0.314;
+            case 14:
+                criticalValue = 0.314;
                 break;
-            case 15:  criticalValue = 0.304;
+            case 15:
+                criticalValue = 0.304;
                 break;
-            case 16:  criticalValue = 0.295;
+            case 16:
+                criticalValue = 0.295;
                 break;
-            case 17:  criticalValue = 0.286;
+            case 17:
+                criticalValue = 0.286;
                 break;
-            case 18:  criticalValue = 0.279;
+            case 18:
+                criticalValue = 0.279;
                 break;
-            case 19:  criticalValue = 0.271;
+            case 19:
+                criticalValue = 0.271;
                 break;
-            case 20:  criticalValue = 0.265;
+            case 20:
+                criticalValue = 0.265;
                 break;
-            case 21:  criticalValue = 0.259;
+            case 21:
+                criticalValue = 0.259;
                 break;
-            case 22: criticalValue = 0.253;
+            case 22:
+                criticalValue = 0.253;
                 break;
-            case 23: criticalValue = 0.247;
+            case 23:
+                criticalValue = 0.247;
                 break;
-            case 24: criticalValue = 0.242;
+            case 24:
+                criticalValue = 0.242;
                 break;
-            default: criticalValue = 0.238;
+            default:
+                criticalValue = 0.238;
                 break;
         }
 

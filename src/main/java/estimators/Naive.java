@@ -5,6 +5,7 @@ import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.javatuples.Septet;
 import org.javatuples.Sextet;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class Naive implements Estimator {
     }
 
     @Override
-    public Sextet<String, String, String, double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
         if (factor != 1) {
             throw new IllegalArgumentException();
@@ -51,7 +52,7 @@ public class Naive implements Estimator {
             toReturnPred[i] = ratio * test_x[i];
         }
 
-        return new Sextet<>(taskname, estimatorName, resourceToPredict, toReturnPred, test_y, toReturnError);
+        return new Septet<>(taskname, estimatorName, resourceToPredict, test_x, toReturnPred, test_y, toReturnError);
 
     }
 

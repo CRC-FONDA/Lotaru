@@ -1,5 +1,6 @@
 package helper;
 
+import org.javatuples.Septet;
 import org.javatuples.Sextet;
 
 import java.io.*;
@@ -7,20 +8,20 @@ import java.util.List;
 
 public class WriteEstimatesToCSV {
 
-    public static void writeTasksToCSV(String filename, Workflow workflow, int experiment, List<Sextet<String, String, String, double[], double[], double[]>> resultsToSave) throws IOException {
+    public static void writeTasksToCSV(String filename, Workflow workflow, int experiment, List<Septet<String, String, String, double[] ,double[], double[], double[]>> resultsToSave) throws IOException {
 
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filename, true));
 
 
         File file = new File(filename);
         if (file.length() == 0) {
-            bufferedWriter.write("Workflow,TaskName,Estimator,Feature,Predicted,Real,Deviation" + "\n");
+            bufferedWriter.write("Workflow,TaskName,Estimator,Feature,SizeInput,Predicted,Real,Deviation" + "\n");
         }
         resultsToSave.forEach(entry -> {
 
             for (int i = 0; i < entry.getValue5().length; i++) {
                 try {
-                    bufferedWriter.write(workflow + "-" + experiment + "," + entry.getValue0() + "," + entry.getValue1() + "," + entry.getValue2() + "," + entry.getValue3()[i] + "," + entry.getValue4()[i] + "," + entry.getValue5()[i] + "\n");
+                    bufferedWriter.write(workflow + "-" + experiment + "," + entry.getValue0() + "," + entry.getValue1() + "," + entry.getValue2() + "," +  entry.getValue3()[i]  +","+ entry.getValue4()[i] + "," + entry.getValue5()[i] + "," + entry.getValue6()[i] + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

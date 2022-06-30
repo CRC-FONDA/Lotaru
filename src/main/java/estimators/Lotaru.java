@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.javatuples.Septet;
 import org.javatuples.Sextet;
 
 import java.io.*;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Lotaru implements Estimator {
-    public Sextet<String, String, String, double[],  double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
 
         if (train_x.length != train_y.length) {
@@ -35,17 +36,17 @@ public class Lotaru implements Estimator {
 
             double[] toReturnError = new double[test_y.length];
 
-            for(int i=0; i<toReturnError.length; i++) {
+            for (int i = 0; i < toReturnError.length; i++) {
                 toReturnError[i] = Math.abs((median_predicted - test_y[i]) / test_y[i]);
             }
 
             double[] median_predicted_arr = new double[test_y.length];
 
-            for(int i=0; i<test_y.length; i++) {
+            for (int i = 0; i < test_y.length; i++) {
                 median_predicted_arr[i] = median_predicted;
             }
 
-            return new Sextet<>(taskname, "Lotaru", resourceToPredict, median_predicted_arr, test_y, toReturnError);
+            return new Septet<>(taskname, "Lotaru", resourceToPredict, test_x, median_predicted_arr, test_y, toReturnError);
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("bayes.py"), StringUtils.join(train_x, ','), StringUtils.join(train_y, ','), StringUtils.join(test_x, ','), StringUtils.join(test_y, ','));
@@ -60,9 +61,9 @@ public class Lotaru implements Estimator {
 
             for (String s : results) {
                 System.out.println(s);
-                if(s.contains("Prediction:")) {
+                if (s.contains("Prediction:")) {
                     System.out.println(s);
-                    predicted = Arrays.stream(s.split("\\[")[1].substring(0, s.split("\\[")[1].length() - 1).split(" ")).filter(str -> NumberUtils.isCreatable(str)).map(reg -> Double.valueOf(reg) * factor).mapToDouble(Double::valueOf).toArray() ;
+                    predicted = Arrays.stream(s.split("\\[")[1].substring(0, s.split("\\[")[1].length() - 1).split(" ")).filter(str -> NumberUtils.isCreatable(str)).map(reg -> Double.valueOf(reg) * factor).mapToDouble(Double::valueOf).toArray();
                 }
             }
 
@@ -82,16 +83,15 @@ public class Lotaru implements Estimator {
 
         double[] toReturnError = new double[test_y.length];
 
-        for(int i = 0; i< predicted.length; i++) {
+        for (int i = 0; i < predicted.length; i++) {
             toReturnError[i] = Math.abs((predicted[i] - test_y[i]) / test_y[i]);
-            if(toReturnError[i] > 1) {
+            if (toReturnError[i] > 1) {
                 System.out.println(i);
             }
         }
 
 
-
-        return new Sextet<>(taskname, "Lotaru", resourceToPredict, predicted, test_y, toReturnError);
+        return new Septet<>(taskname, "Lotaru", resourceToPredict, test_x, predicted, test_y, toReturnError);
 
     }
 
@@ -120,11 +120,11 @@ public class Lotaru implements Estimator {
 
         // TODO
 
-        System.out.println(Arrays.deepToString(train_x).replaceAll("\\s+",""));
+        System.out.println(Arrays.deepToString(train_x).replaceAll("\\s+", ""));
 
-        System.out.println(" " + Arrays.deepToString(train_x).replaceAll("\\s+","") + " " +StringUtils.join(train_y, ',') + " " +Arrays.deepToString(test_x).replaceAll("\\s+","") + " " +StringUtils.join(test_y, ','));
+        System.out.println(" " + Arrays.deepToString(train_x).replaceAll("\\s+", "") + " " + StringUtils.join(train_y, ',') + " " + Arrays.deepToString(test_x).replaceAll("\\s+", "") + " " + StringUtils.join(test_y, ','));
 
-        ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("bayes_v2.py"), Arrays.deepToString(train_x).replaceAll("\\s+",""), StringUtils.join(train_y, ','), Arrays.deepToString(test_x).replaceAll("\\s+",""), StringUtils.join(test_y, ','));
+        ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("bayes_v2.py"), Arrays.deepToString(train_x).replaceAll("\\s+", ""), StringUtils.join(train_y, ','), Arrays.deepToString(test_x).replaceAll("\\s+", ""), StringUtils.join(test_y, ','));
         processBuilder.redirectErrorStream(true);
 
         double predicted = 0;
@@ -136,7 +136,7 @@ public class Lotaru implements Estimator {
 
             for (String s : results) {
                 System.out.println(s);
-                if(s.contains("Prediction:")) {
+                if (s.contains("Prediction:")) {
                     System.out.println(s);
                     predicted = Double.valueOf(s.split("\\[")[1].substring(0, s.split("\\[")[1].length() - 1)) * factor;
                 }
