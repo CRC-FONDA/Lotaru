@@ -7,7 +7,7 @@ import java.util.List;
 
 public class WriteEstimatesToCSV {
 
-    public static void writeTasksToCSV(String filename, Workflow workflow, int experiment, List<Sextet<String, String, String, Double, Double, double[]>> resultsToSave) throws IOException {
+    public static void writeTasksToCSV(String filename, Workflow workflow, int experiment, List<Sextet<String, String, String, double[], double[], double[]>> resultsToSave) throws IOException {
 
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filename, true));
 
@@ -20,7 +20,7 @@ public class WriteEstimatesToCSV {
 
             for (int i = 0; i < entry.getValue5().length; i++) {
                 try {
-                    bufferedWriter.write(workflow + "-" + experiment + "," + entry.getValue0() + "," + entry.getValue1() + "," + entry.getValue2() + "," + entry.getValue3() + "," + entry.getValue4() + "," + entry.getValue5()[i] + "\n");
+                    bufferedWriter.write(workflow + "-" + experiment + "," + entry.getValue0() + "," + entry.getValue1() + "," + entry.getValue2() + "," + entry.getValue3()[i] + "," + entry.getValue4()[i] + "," + entry.getValue5()[i] + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

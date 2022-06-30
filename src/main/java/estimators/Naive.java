@@ -1,14 +1,10 @@
 package estimators;
 
 import domain.SilhouetteScore;
-import org.apache.commons.math3.distribution.GammaDistribution;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.javatuples.Sextet;
 
 import java.util.ArrayList;
@@ -28,7 +24,7 @@ public class Naive implements Estimator {
     }
 
     @Override
-    public Sextet<String, String, String, Double, Double, double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Sextet<String, String, String, double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
         if (factor != 1) {
             throw new IllegalArgumentException();
@@ -49,13 +45,13 @@ public class Naive implements Estimator {
 
 
         double[] toReturnError = new double[test_y.length];
-
+        double[] toReturnPred = new double[test_y.length];
         for (int i = 0; i < toReturnError.length; i++) {
             toReturnError[i] = Math.abs((ratio * test_x[i] - test_y[i]) / test_y[i]);
-
+            toReturnPred[i] = ratio * test_x[i];
         }
 
-        return new Sextet<>(taskname, estimatorName, resourceToPredict, toReturnError[0], test_y[0], toReturnError);
+        return new Sextet<>(taskname, estimatorName, resourceToPredict, toReturnPred, test_y, toReturnError);
 
     }
 

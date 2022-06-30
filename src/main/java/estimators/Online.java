@@ -26,7 +26,7 @@ public class Online implements Estimator {
     }
 
     @Override
-    public Sextet<String, String, String, Double, Double, double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Sextet<String, String, String, double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
         if (factor != 1 || test_x.length != test_x.length) {
             throw new IllegalArgumentException();
@@ -79,7 +79,7 @@ public class Online implements Estimator {
             System.out.println("Actual Time: " + actual);
             System.out.println("Abweichung:  " + Math.abs((predicted[0] - actual) / actual));
 
-            return new Sextet<>(taskname, estimatorName, resourceToPredict, predicted[0], actual, predictedError);
+            return new Sextet<>(taskname, estimatorName, resourceToPredict, predicted, test_y, predictedError);
         } else {
 
 
@@ -101,7 +101,13 @@ public class Online implements Estimator {
                     toReturnError[i] = Math.abs((median_predicted - test_y[i]) / test_y[i]);
                 }
 
-                return new Sextet<>(taskname, estimatorName, resourceToPredict, median_predicted, test_y[0], toReturnError);
+                double[] median_predicted_arr = new double[test_y.length];
+
+                for(int i=0; i<test_y.length; i++) {
+                    median_predicted_arr[i] = median_predicted;
+                }
+
+                return new Sextet<>(taskname, estimatorName, resourceToPredict, median_predicted_arr, test_y, toReturnError);
             }
 
             ArrayList<DoublePoint> clusterPoints = new ArrayList<>();
@@ -145,7 +151,13 @@ public class Online implements Estimator {
                     toReturnError[i] = Math.abs((predicted - test_y[i]) / test_y[i]);
                 }
 
-                return new Sextet<>(taskname, estimatorName, resourceToPredict, predicted, test_y[0], toReturnError);
+                double[] percentile_predicted_arr = new double[test_y.length];
+
+                for(int i=0; i<test_y.length; i++) {
+                    percentile_predicted_arr[i] = predicted;
+                }
+
+                return new Sextet<>(taskname, estimatorName, resourceToPredict, percentile_predicted_arr, test_y, toReturnError);
             }
 
             NormalDistribution normalDistribution = new NormalDistribution(mean, std);
@@ -181,7 +193,13 @@ public class Online implements Estimator {
                 toReturnError[i] = Math.abs((predicted - test_y[i]) / test_y[i]);
             }
 
-            return new Sextet<>(taskname, estimatorName, resourceToPredict, predicted, test_y[0], toReturnError);
+            double[] percentile_predicted_arr = new double[test_y.length];
+
+            for(int i=0; i<test_y.length; i++) {
+                percentile_predicted_arr[i] = predicted;
+            }
+
+            return new Sextet<>(taskname, estimatorName, resourceToPredict, percentile_predicted_arr, test_y, toReturnError);
         }
 
     }

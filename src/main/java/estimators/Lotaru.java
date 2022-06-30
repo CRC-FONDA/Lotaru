@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Lotaru implements Estimator {
-    public Sextet<String, String, String, Double, Double, double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Sextet<String, String, String, double[],  double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
 
         if (train_x.length != train_y.length) {
@@ -39,7 +39,13 @@ public class Lotaru implements Estimator {
                 toReturnError[i] = Math.abs((median_predicted - test_y[i]) / test_y[i]);
             }
 
-            return new Sextet<>(taskname, "Lotaru", resourceToPredict, median_predicted, test_y[0], toReturnError);
+            double[] median_predicted_arr = new double[test_y.length];
+
+            for(int i=0; i<test_y.length; i++) {
+                median_predicted_arr[i] = median_predicted;
+            }
+
+            return new Sextet<>(taskname, "Lotaru", resourceToPredict, median_predicted_arr, test_y, toReturnError);
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("bayes.py"), StringUtils.join(train_x, ','), StringUtils.join(train_y, ','), StringUtils.join(test_x, ','), StringUtils.join(test_y, ','));
@@ -85,7 +91,7 @@ public class Lotaru implements Estimator {
 
 
 
-        return new Sextet<>(taskname, "Lotaru", resourceToPredict, predicted[0], test_y[0], toReturnError);
+        return new Sextet<>(taskname, "Lotaru", resourceToPredict, predicted, test_y, toReturnError);
 
     }
 

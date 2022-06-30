@@ -100,7 +100,7 @@ public class Main {
         System.out.println("Feature to predict: " + to_predict);
         System.out.println("------------------------------");
 
-        ArrayList<Sextet<String, String, String, Double, Double, double[]>> estimates = new ArrayList<>();
+        ArrayList<Sextet<String, String, String, double[], double[], double[]>> estimates = new ArrayList<>();
 
         wally_tasks_grouped.keySet().forEach(key -> {
             var listTasksWally = wally_tasks_grouped.get(key);
