@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Lotaru implements Estimator {
-    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+public class LotaruG implements Estimator {
+    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] ids, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
 
         if (train_x.length != train_y.length) {
@@ -23,7 +23,7 @@ public class Lotaru implements Estimator {
         var pearson = calculatePearson(train_x, train_y);
 
         System.out.println("Pearson:" + pearson);
-        if (pearson < 0.8 || Double.isNaN(pearson)) {
+        if (pearson < 0.75 || Double.isNaN(pearson)) {
             System.out.println("Pearson below");
             DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(train_y);
 
@@ -46,13 +46,13 @@ public class Lotaru implements Estimator {
                 median_predicted_arr[i] = median_predicted;
             }
 
-            return new Septet<>(taskname, "Lotaru", resourceToPredict, test_x, median_predicted_arr, test_y, toReturnError);
+            return new Septet<>(taskname, "Lotaru", resourceToPredict, ids, median_predicted_arr, test_y, toReturnError);
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("bayes.py"), StringUtils.join(train_x, ','), StringUtils.join(train_y, ','), StringUtils.join(test_x, ','), StringUtils.join(test_y, ','));
         processBuilder.redirectErrorStream(true);
 
-        double predicted[] = new double[2];
+        double predicted[] = new double[test_y.length];
 
         try {
             Process process = processBuilder.start();
@@ -61,8 +61,8 @@ public class Lotaru implements Estimator {
 
             for (String s : results) {
                 System.out.println(s);
-                if (s.contains("Prediction:")) {
-                    System.out.println(s);
+                if (s.contains("P:")) {
+                    System.out.println("Line: " + s);
                     predicted = Arrays.stream(s.split("\\[")[1].substring(0, s.split("\\[")[1].length() - 1).split(" ")).filter(str -> NumberUtils.isCreatable(str)).map(reg -> Double.valueOf(reg) * factor).mapToDouble(Double::valueOf).toArray();
                 }
             }
@@ -91,7 +91,7 @@ public class Lotaru implements Estimator {
         }
 
 
-        return new Septet<>(taskname, "Lotaru", resourceToPredict, test_x, predicted, test_y, toReturnError);
+        return new Septet<>(taskname, "Lotaru-G", resourceToPredict, ids, predicted, test_y, toReturnError);
 
     }
 
@@ -156,7 +156,7 @@ public class Lotaru implements Estimator {
         System.out.println("Actual Time: " + test_y[0]);
         System.out.println("Abweichung:  " + Math.abs((predicted - test_y[0]) / test_y[0]));
         // TODO, Abweichung y_pred - y_real oder vice versa
-        return new Sextet<>(taskname, "Lotaru", resourceToPredict, predicted, test_y[0], Math.abs((predicted - test_y[0]) / test_y[0]));
+        return new Sextet<>(taskname, "Lotaru-G", resourceToPredict, predicted, test_y[0], Math.abs((predicted - test_y[0]) / test_y[0]));
 
     }
 

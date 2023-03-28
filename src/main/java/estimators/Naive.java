@@ -25,7 +25,7 @@ public class Naive implements Estimator {
     }
 
     @Override
-    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] ids, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
         if (factor != 1) {
             throw new IllegalArgumentException();
@@ -52,7 +52,7 @@ public class Naive implements Estimator {
             toReturnPred[i] = ratio * test_x[i];
         }
 
-        return new Septet<>(taskname, estimatorName, resourceToPredict, test_x, toReturnPred, test_y, toReturnError);
+        return new Septet<>(taskname, estimatorName, resourceToPredict, ids, toReturnPred, test_y, toReturnError);
 
     }
 

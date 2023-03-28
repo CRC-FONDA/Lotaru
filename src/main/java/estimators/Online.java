@@ -13,7 +13,10 @@ import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.javatuples.Septet;
 import org.javatuples.Sextet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Online implements Estimator {
 
@@ -27,7 +30,7 @@ public class Online implements Estimator {
     }
 
     @Override
-    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
+    public Septet<String, String, String, double[], double[], double[], double[]> estimateWith1DInput(String taskname, String resourceToPredict, double[] ids, double[] train_x, double[] train_y, double[] test_x, double[] test_y, double factor) {
 
         if (factor != 1 || test_x.length != test_x.length) {
             throw new IllegalArgumentException();
@@ -80,7 +83,7 @@ public class Online implements Estimator {
             System.out.println("Actual Time: " + actual);
             System.out.println("Abweichung:  " + Math.abs((predicted[0] - actual) / actual));
 
-            return new Septet<>(taskname, estimatorName, resourceToPredict, test_x, predicted, test_y, predictedError);
+            return new Septet<>(taskname, estimatorName, resourceToPredict, ids, predicted, test_y, predictedError);
         } else {
 
 
@@ -108,7 +111,7 @@ public class Online implements Estimator {
                     median_predicted_arr[i] = median_predicted;
                 }
 
-                return new Septet<>(taskname, estimatorName, resourceToPredict, test_x,median_predicted_arr, test_y, toReturnError);
+                return new Septet<>(taskname, estimatorName, resourceToPredict, ids, median_predicted_arr, test_y, toReturnError);
             }
 
             ArrayList<DoublePoint> clusterPoints = new ArrayList<>();
@@ -158,7 +161,7 @@ public class Online implements Estimator {
                     percentile_predicted_arr[i] = predicted;
                 }
 
-                return new Septet<>(taskname, estimatorName, resourceToPredict, test_x ,percentile_predicted_arr, test_y, toReturnError);
+                return new Septet<>(taskname, estimatorName, resourceToPredict, ids, percentile_predicted_arr, test_y, toReturnError);
             }
 
             NormalDistribution normalDistribution = new NormalDistribution(mean, std);
@@ -198,7 +201,7 @@ public class Online implements Estimator {
                 percentile_predicted_arr[i] = predicted;
             }
 
-            return new Septet<>(taskname, estimatorName, resourceToPredict, test_x ,percentile_predicted_arr, test_y, toReturnError);
+            return new Septet<>(taskname, estimatorName, resourceToPredict, ids, percentile_predicted_arr, test_y, toReturnError);
         }
 
     }

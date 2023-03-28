@@ -2,6 +2,5 @@ package helper;
 
 public enum Workflow {
 
-    ATACSEQ, BACASS, METHYLSEQ, CHIPSEQ, EAGER
-
+    EAGER, BACASS, CHIPSEQ, ATACSEQ, METHYLSEQ
 }

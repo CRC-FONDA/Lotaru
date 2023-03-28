@@ -40,7 +40,10 @@ public class HistoricTask {
 
     private double memory_assigned;
 
-    public HistoricTask(String machine, String workflow, double numberReads, double workflowInputSize, String taskName, double realtime, double cpu_usage, double cpus_assigned, double rchar, double wchar, double syscr, double syscw, double rss, double vmem, double peak_rss, double memory_assigned, double taskInputSize, double taskInputSizeUncompressed, double workflowInputSizeUncompressed) {
+    private String label;
+
+    public HistoricTask(String label, String machine, String workflow, double numberReads, double workflowInputSize, String taskName, double realtime, double cpu_usage, double cpus_assigned, double rchar, double wchar, double syscr, double syscw, double rss, double vmem, double peak_rss, double memory_assigned, double taskInputSize, double taskInputSizeUncompressed, double workflowInputSizeUncompressed) {
+        this.label = label;
         this.machine = machine;
         this.workflow = workflow;
         this.numberReads = numberReads;
@@ -62,7 +65,8 @@ public class HistoricTask {
         this.workflowInputSizeUncompressed = workflowInputSizeUncompressed;
     }
 
-    public HistoricTask(String machine, String workflow, double numberReads, double workflowInputSize, String taskName, double realtime, double cpu_usage, double cpus_assigned, double rchar, double wchar, double syscr, double syscw, double rss, double vmem, double peak_rss, double memory_assigned) {
+    public HistoricTask(String label, String machine, String workflow, double numberReads, double workflowInputSize, String taskName, double realtime, double cpu_usage, double cpus_assigned, double rchar, double wchar, double syscr, double syscw, double rss, double vmem, double peak_rss, double memory_assigned) {
+        this.label = label;
         this.machine = machine;
         this.workflow = workflow;
         this.numberReads = numberReads;
@@ -231,5 +235,13 @@ public class HistoricTask {
 
     public void setWorkflowInputSizeUncompressed(double workflowInputSizeUncompressed) {
         this.workflowInputSizeUncompressed = workflowInputSizeUncompressed;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }
