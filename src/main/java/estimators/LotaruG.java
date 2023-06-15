@@ -22,17 +22,10 @@ public class LotaruG implements Estimator {
 
         var pearson = calculatePearson(train_x, train_y);
 
-        System.out.println("Pearson:" + pearson);
         if (pearson < 0.75 || Double.isNaN(pearson)) {
-            System.out.println("Pearson below");
             DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(train_y);
 
             double median_predicted = descriptiveStatistics.getPercentile(50);
-
-            System.out.println("Not the case");
-            System.out.println("Predicted:   " + median_predicted);
-            System.out.println("Actual Time: " + test_y[0]);
-            System.out.println("Abweichung:  " + Math.abs((median_predicted - test_y[0]) / test_y[0]));
 
             double[] toReturnError = new double[test_y.length];
 
@@ -46,7 +39,7 @@ public class LotaruG implements Estimator {
                 median_predicted_arr[i] = median_predicted;
             }
 
-            return new Septet<>(taskname, "Lotaru", resourceToPredict, ids, median_predicted_arr, test_y, toReturnError);
+            return new Septet<>(taskname, "Lotaru-G", resourceToPredict, ids, median_predicted_arr, test_y, toReturnError);
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("bayes.py"), StringUtils.join(train_x, ','), StringUtils.join(train_y, ','), StringUtils.join(test_x, ','), StringUtils.join(test_y, ','));
@@ -60,9 +53,7 @@ public class LotaruG implements Estimator {
             List<String> results = readProcessOutput(process.getInputStream());
 
             for (String s : results) {
-                System.out.println(s);
-                if (s.contains("P:")) {
-                    System.out.println("Line: " + s);
+                if (s.contains("Prediction:")) {
                     predicted = Arrays.stream(s.split("\\[")[1].substring(0, s.split("\\[")[1].length() - 1).split(" ")).filter(str -> NumberUtils.isCreatable(str)).map(reg -> Double.valueOf(reg) * factor).mapToDouble(Double::valueOf).toArray();
                 }
             }
@@ -70,16 +61,9 @@ public class LotaruG implements Estimator {
             int exitCode = 0;
 
             exitCode = process.waitFor();
-            System.out.println("Exit Code:" + exitCode);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("factor:" + factor);
-        System.out.println("-----Lotaru-----");
-        System.out.println("Predicted:   " + predicted);
-        System.out.println("Actual Time: " + test_y[0]);
-        System.out.println("Abweichung:  " + Math.abs((predicted[0] - test_y[0]) / test_y[0]));
 
         double[] toReturnError = new double[test_y.length];
 
@@ -89,7 +73,6 @@ public class LotaruG implements Estimator {
                 System.out.println(i);
             }
         }
-
 
         return new Septet<>(taskname, "Lotaru-G", resourceToPredict, ids, predicted, test_y, toReturnError);
 
@@ -110,15 +93,10 @@ public class LotaruG implements Estimator {
 
             double median_predicted = descriptiveStatistics.getPercentile(50);
 
-            System.out.println("Not the case");
-            System.out.println("Predicted:   " + median_predicted);
-            System.out.println("Actual Time: " + test_y[0]);
-            System.out.println("Abweichung:  " + Math.abs((median_predicted - test_y[0]) / test_y[0]));
 
-            return new Sextet<>(taskname, "Lotaru", resourceToPredict, median_predicted, test_y[0], Math.abs((median_predicted - test_y[0]) / test_y[0]));
+            return new Sextet<>(taskname, "Lotaru-G", resourceToPredict, median_predicted, test_y[0], Math.abs((median_predicted - test_y[0]) / test_y[0]));
         }
 
-        // TODO
 
         System.out.println(Arrays.deepToString(train_x).replaceAll("\\s+", ""));
 
@@ -145,17 +123,10 @@ public class LotaruG implements Estimator {
             int exitCode = 0;
 
             exitCode = process.waitFor();
-            System.out.println("Exit Code:" + exitCode);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        System.out.println("factor:" + factor);
-        System.out.println("-----Lotaru-----");
-        System.out.println("Predicted:   " + predicted);
-        System.out.println("Actual Time: " + test_y[0]);
-        System.out.println("Abweichung:  " + Math.abs((predicted - test_y[0]) / test_y[0]));
-        // TODO, Abweichung y_pred - y_real oder vice versa
         return new Sextet<>(taskname, "Lotaru-G", resourceToPredict, predicted, test_y[0], Math.abs((predicted - test_y[0]) / test_y[0]));
 
     }

@@ -32,7 +32,6 @@ public class Naive implements Estimator {
         }
 
         var actual = test_y[0];
-        System.out.println("-----Naive-----");
 
         ArrayList<Double> ratios = new ArrayList<>();
 

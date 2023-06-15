@@ -39,7 +39,6 @@ public class Online implements Estimator {
 
         var pearson = calculatePearson(train_x, train_y);
         var actual = test_y[0];
-        System.out.println("-----Silva-----");
         if (pearson > 0.8) {
 
             //var targetRatio = test_y[0] / test_x[0];
@@ -77,12 +76,6 @@ public class Online implements Estimator {
                 predictedError[i] = Math.abs((predicted[i] - test_y[i]) / test_y[i]);
             }
 
-
-            System.out.println("Ratio:       " + ratio);
-            System.out.println("Predicted:   " + predicted);
-            System.out.println("Actual Time: " + actual);
-            System.out.println("Abweichung:  " + Math.abs((predicted[0] - actual) / actual));
-
             return new Septet<>(taskname, estimatorName, resourceToPredict, ids, predicted, test_y, predictedError);
         } else {
 
@@ -93,11 +86,6 @@ public class Online implements Estimator {
                 DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(train_y);
 
                 double median_predicted = descriptiveStatistics.getPercentile(50);
-
-                System.out.println("Aus Cluster");
-                System.out.println("Predicted:   " + median_predicted);
-                System.out.println("Actual Time: " + actual);
-                System.out.println("Abweichung:  " + (Math.abs((median_predicted - actual)) / test_y[0]));
 
                 double[] toReturnError = new double[test_y.length];
 
@@ -138,16 +126,10 @@ public class Online implements Estimator {
             double mean = stats.getMean();
             double std = stats.getStandardDeviation();
 
-            System.out.println("Mean:" + mean + " std: " + std);
-
             double predicted;
 
             if (std == 0) {
                 predicted = stats.getPercentile(50);
-                System.out.println("Aus Cluster");
-                System.out.println("Predicted:   " + predicted);
-                System.out.println("Actual Time: " + actual);
-                System.out.println("Abweichung:  " + Math.abs((predicted - actual) / test_y[0]));
 
                 double[] toReturnError = new double[test_y.length];
 
@@ -183,11 +165,6 @@ public class Online implements Estimator {
             } else {
                 predicted = stats.getPercentile(50);
             }
-
-            System.out.println("Aus Cluster");
-            System.out.println("Predicted:   " + predicted);
-            System.out.println("Actual Time: " + actual);
-            System.out.println("Abweichung:  " + Math.abs((predicted - actual) / test_y[0]));
 
             double[] toReturnError = new double[test_y.length];
 

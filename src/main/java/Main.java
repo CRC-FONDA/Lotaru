@@ -55,13 +55,7 @@ public class Main {
         List<HistoricTask> LocalMachineTrainingReducedCPUFreq;
 
         List<HistoricTask> target_tasks = CSVFileTaskReader.readCSVFile("execution_reports/" + targetMachine.toString().toLowerCase() + "/results_" + workflow.toString().toLowerCase() + "/execution_report_" + targetMachine.toString().toLowerCase() + ".csv").stream().filter(task -> task.getLabel().contains("test")).collect(Collectors.toList());
-        // TODO Werte überprüfen, welche in den csv. outputs stehen für zB dje input sizes und für das Lernen (ob die Paare stimmen)
-        // write und read bytes in Model hinzunehmen
-        // Nicht alle werte fürs Training benutzen sondern nur 1 oder 2
-        // zusätzliche Experimente einpflegen
-        // Online learner und dann den Extrapolatin Wert dynamisch heruasfinden?
 
-        // TODO aktuell nur Atacseq WF, Tasks einzeln angucken wegen Benchmark values
 
         if (targetMachine != TargetMachine.LOCAL) {
 
@@ -89,9 +83,6 @@ public class Main {
         Map<String, List<HistoricTask>> targetTestGrouped = target_tasks.stream()
                 .collect(Collectors.groupingBy(HistoricTask::getTaskName));
 
-
-        System.out.println("Feature to predict: " + to_predict);
-        System.out.println("------------------------------");
 
         ArrayList<Septet<String, String, String, double[], double[], double[], double[]>> estimates = new ArrayList<>();
 
@@ -128,19 +119,19 @@ public class Main {
             var rchar_id_WfInputSize = test_taskRChar.stream().map(task -> task.getValue2()).collect(Collectors.toList()).stream().mapToDouble(d -> d).toArray();
 
             System.out.println("Task:        " + key + ":");
-            Estimator ridge = new LotaruG();
+            Estimator lotaruG = new LotaruG();
 
             if (targetMachine != TargetMachine.LOCAL) {
-                estimates.add(ridge.estimateWith1DInput(key, to_predict, lotare_id_WfInputSize, x_train_lotare, y_train_lotare, x_test_lotare, y_test_lotare, BenchmarkHelper.defineFactor(targetMachine)));
+                estimates.add(lotaruG.estimateWith1DInput(key, to_predict, lotare_id_WfInputSize, x_train_lotare, y_train_lotare, x_test_lotare, y_test_lotare, BenchmarkHelper.defineFactor(targetMachine)));
 
             } else {
-                estimates.add(ridge.estimateWith1DInput(key, to_predict, lotare_id_WfInputSize, x_train_lotare, y_train_lotare, x_test_lotare, y_test_lotare, 1));
+                estimates.add(lotaruG.estimateWith1DInput(key, to_predict, lotare_id_WfInputSize, x_train_lotare, y_train_lotare, x_test_lotare, y_test_lotare, 1));
             }
 
             Estimator onlineP = new Online(false, "OnlineP");
             Estimator onlineM = new Online(true, "OnlineM");
             Estimator naive = new Naive(true, "Naive");
-            Estimator locallyJ = new LocallyA();
+            Estimator lotaruA = new LotaruA();
             Estimator perfect = new Perfect();
 
 
@@ -153,14 +144,13 @@ public class Main {
             double microbenchmarkLocal = BenchmarkHelper.medianBenchmarkValue(BenchmarkHelper.readBenchValue(key, TargetMachine.LOCAL, workflow).getRealtimes());
             double microbenchmarkTarget = BenchmarkHelper.medianBenchmarkValue(BenchmarkHelper.readBenchValue(key, targetMachine, workflow).getRealtimes());
 
-            double locallyJFactor = microbenchmarkTarget / microbenchmarkLocal;
-            System.out.println("locallyJFactor :" + locallyJFactor);
-            if (locallyJFactor == 1.0) {
-                locallyJFactor = BenchmarkHelper.estimateAverageForWorkflowMachine(workflow, targetMachine, localTrainingGrouped.keySet());
+            double lotaruAFactor = microbenchmarkTarget / microbenchmarkLocal;
+            if (lotaruAFactor == 1.0) {
+                lotaruAFactor = BenchmarkHelper.estimateAverageForWorkflowMachine(workflow, targetMachine, localTrainingGrouped.keySet());
             }
 
 
-            estimates.add(locallyJ.estimateWith1DInput(key, to_predict,lotare_id_WfInputSize, x_train_lotare, y_train_lotare, x_test_lotare, y_test_lotare, locallyJFactor));
+            estimates.add(lotaruA.estimateWith1DInput(key, to_predict,lotare_id_WfInputSize, x_train_lotare, y_train_lotare, x_test_lotare, y_test_lotare, lotaruAFactor));
 
             estimates.add(perfect.estimateWith1DInput(key, to_predict, lotare_id_WfInputSize, x_train_lotare, y_train_lotare ,x_test_lotare, y_test_lotare, 1));
             System.out.println("------------------------------");
@@ -172,21 +162,21 @@ public class Main {
 
             //Lotaru
 
-            DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
+            DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru-A")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
 
-            double median_predicted_lotaru = descriptiveStatistics.getPercentile(50);
-            System.out.println("Lotaru median deviation: " + median_predicted_lotaru);
+            double median_predicted_lotaruA = descriptiveStatistics.getPercentile(50);
+            System.out.println("Lotaru-G median deviation: " + median_predicted_lotaruA);
 
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "Lotaru", median_predicted_lotaru, descriptiveStatistics.getSum());
+            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "Lotaru-G", median_predicted_lotaruA, descriptiveStatistics.getSum());
 
             //Lotaru
 
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("LocallyJ")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
+            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru-G")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
 
-            double median_predicted_locallyJ = descriptiveStatistics.getPercentile(50);
-            System.out.println("LocallyJ median deviation: " + median_predicted_locallyJ);
+            double median_predicted_lotaruG = descriptiveStatistics.getPercentile(50);
+            System.out.println("Lotaru-A median deviation: " + median_predicted_lotaruG);
 
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "LocallyJ", median_predicted_locallyJ, descriptiveStatistics.getSum());
+            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "Lotaru-A", median_predicted_lotaruG, descriptiveStatistics.getSum());
 
 
             //OnlineM
