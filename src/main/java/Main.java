@@ -158,56 +158,10 @@ public class Main {
         });
 
         try {
+
+            // All Tasks
+
             WriteEstimatesToCSV.writeTasksToCSV("results/tasks_lotaru_" + targetMachine.toString().toLowerCase() + ".csv",targetMachine.toString().toLowerCase(), workflow, experiment_number, estimates);
-
-            //Lotaru
-
-            DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru-A")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
-
-            double median_predicted_lotaruA = descriptiveStatistics.getPercentile(50);
-            System.out.println("Lotaru-G median deviation: " + median_predicted_lotaruA);
-
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "Lotaru-G", median_predicted_lotaruA, descriptiveStatistics.getSum());
-
-            //Lotaru
-
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Lotaru-G")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
-
-            double median_predicted_lotaruG = descriptiveStatistics.getPercentile(50);
-            System.out.println("Lotaru-A median deviation: " + median_predicted_lotaruG);
-
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "Lotaru-A", median_predicted_lotaruG, descriptiveStatistics.getSum());
-
-
-            //OnlineM
-
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("OnlineM")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
-
-            double median_predicted_online_m = descriptiveStatistics.getPercentile(50);
-            System.out.println("OnlineM median deviation: " + median_predicted_online_m);
-
-
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "OnlineM", median_predicted_online_m, descriptiveStatistics.getSum());
-
-            //OnlineP
-
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("OnlineP")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
-
-            double median_predicted_online_p = descriptiveStatistics.getPercentile(50);
-            System.out.println("OnlineP median deviation: " + median_predicted_online_p);
-
-
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "OnlineP", median_predicted_online_p, descriptiveStatistics.getSum());
-
-            //Naive
-
-            descriptiveStatistics = new DescriptiveStatistics(estimates.stream().filter(sextet -> sextet.getValue1().equalsIgnoreCase("Naive")).map(sextet -> sextet.getValue6()).flatMapToDouble(d -> DoubleStream.of(d)).toArray());
-
-            double median_predicted_naive = descriptiveStatistics.getPercentile(50);
-            System.out.println("Naive median deviation: " + median_predicted_naive);
-
-
-            WriteEstimatesToCSV.writeCompleteWorkflowToCSV("results/lotare-wf-" + targetMachine.toString().toLowerCase() + ".csv", workflow, experiment_number, dataProfile, targetMachine, targetMachine, "Naive", median_predicted_naive, descriptiveStatistics.getSum());
 
         } catch (
                 IOException e) {
